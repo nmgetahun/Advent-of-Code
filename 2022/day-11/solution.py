@@ -3,7 +3,7 @@ Written by Nat Getahun
 Github username: nmgetahun
 Email: nmgetahun@uchicago.edu
 
-Advent of Code Day 10 Challenge:
+Advent of Code Day 11 Challenge:
 https://adventofcode.com/2022/day/11
 """
 # ------------------------------------------------------------------------------
