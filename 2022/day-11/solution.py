@@ -7,11 +7,13 @@ Advent of Code Day 10 Challenge:
 https://adventofcode.com/2022/day/11
 """
 # ------------------------------------------------------------------------------
+import math
 
 FUNCS = {
     '+': lambda x, y: x + y,
     '*': lambda x, y: x * y
 }
+
 
 class Monkey:
     def __init__(self, items, operation, operand, divisor):
@@ -41,7 +43,7 @@ class Monkey:
         else:
             item = self.operation(self.items[-1], self.items[-1])
 
-        if not part2mod:
+        if part2mod == False:
             self.test(item // 3)
         else:
             self.test(item % part2mod)
@@ -55,7 +57,20 @@ class Monkey:
             self.receivers[0].add_item(item)
         else:
             self.receivers[1].add_item(item)
-        
+
+
+# Parts 1 & 2 Primary (general function)
+def execute(monkeys, rounds, part2mod = False):
+    for _ in range(rounds):
+        for monkey in monkeys:
+            while monkey.has_items():
+                monkey.operate(part2mod)
+    
+    monkey_inspections = [monkey.inspections for monkey in monkeys]
+    monkey_inspections.sort()
+
+    return monkey_inspections[-1] * monkey_inspections[-2]
+
 
 # Generate list of Monkeys with corresponding attributes according to input file
 def parse_monkeys():
@@ -64,7 +79,7 @@ def parse_monkeys():
         eof = file.tell()
         file.seek(0, 0)
 
-        monkeys = []
+        monkeys1, monkeys2 = [], []
         throws = []
         while True:
             # Line 1
@@ -87,42 +102,29 @@ def parse_monkeys():
             ))
 
             # Add Monkey
-            monkeys.append(Monkey(items, operation, operand, divisor))
+            monkeys1.append(Monkey(items, operation, operand, divisor))
+            monkeys2.append(Monkey(items[:], operation, operand, divisor))
             
             if file.tell() == eof:
                 break
             file.readline()
         
         for i, (t, f) in enumerate(throws):
-            monkeys[i].set_receivers(monkeys[t], monkeys[f])
+            monkeys1[i].set_receivers(monkeys1[t], monkeys1[f])
+            monkeys2[i].set_receivers(monkeys2[t], monkeys2[f])
     
-    return monkeys
-
-
-def execute(monkeys, rounds, part2mod = False):
-    for _ in range(rounds):
-        for monkey in monkeys:
-            while monkey.has_items():
-                monkey.operate(part2mod)
-    
-    monkey_inspections = [monkey.inspections for monkey in monkeys]
-    monkey_inspections.sort()
-    return monkey_inspections[-1] * monkey_inspections[-2]
+    return monkeys1, monkeys2
 
 
 # Main
 if __name__ == "__main__":
-    monkeys = parse_monkeys()
+    monkeys1, monkeys2 = parse_monkeys()
 
     # Part 1
     rounds = 20
-    print(f"Part 1: {execute(monkeys, rounds)}")
+    print(f"Part 1: {execute(monkeys1, rounds)}")
 
     # Part 2
     rounds = 10000
-    part2mod = 1
-    for monkey in monkeys:
-        part2mod *= monkey.divisor
-    print(f"Part 2: {execute(monkeys, rounds, part2mod)}")
-
-    
+    part2mod = math.prod(monkey.divisor for monkey in monkeys2)
+    print(f"Part 2: {execute(monkeys2, rounds, part2mod)}")
